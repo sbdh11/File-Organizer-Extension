@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "File Organizer Extension",
+    "version": "1.0",
+    "description": "Automatically organize downloaded files",
+    "permissions": [
+      "downloads",
+      "downloads.shelf"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "icons": {
+      "48": "images/icon-48.png"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "images/icon-16.png",
+        "48": "images/icon-48.png"
+      }
+    }
+  }
+  
