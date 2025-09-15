@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>File Organizer Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 24px;
+    }
+    h1 { margin-top: 0; color: #f8fafc; }
+    .card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    label { display: block; margin-bottom: 8px; color: #cbd5e1; }
+    input, select {
+      background: #0b1220;
+      color: #e2e8f0;
+      border: 1px solid #1f2937;
+      border-radius: 6px;
+      padding: 8px;
+    }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+    .btn.secondary { background: #334155; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; border-bottom: 1px solid #1f2937; padding: 8px; }
+    .muted { color: #94a3b8; font-size: 12px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      background: #111827;
+      color: #e2e8f0;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: fadein .2s ease;
+    }
+    .toast.show { display: flex; }
+    .toast .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <h1>File Organizer Rules</h1>
+  <div class="card">
+    <div class="row" style="justify-content: space-between;">
+      <div>
+        <div class="muted">Map file extensions to destination folders inside your Downloads.</div>
+      </div>
+      <div>
+        <button class="btn" id="save">Save</button>
+        <button class="btn secondary" id="reset">Reset defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <table id="rulesTable">
+      <thead>
+        <tr>
+          <th style="width:30%">Extension</th>
+          <th>Folder</th>
+          <th style="width:80px"></th>
+        </tr>
+      </thead>
+      <tbody id="rulesBody"></tbody>
+    </table>
+    <div style="margin-top:12px;">
+      <button class="btn" id="addRow">Add rule</button>
+    </div>
+  </div>
+
+  <p class="muted">Examples: png → Images, pdf → PDFs, mp4 → Videos</p>
+
+  <div id="toast" class="toast"><div class="dot"></div><div id="toastMsg">Saved</div></div>
+
+  <script src="options.js"></script>
+</body>
+</html> 
