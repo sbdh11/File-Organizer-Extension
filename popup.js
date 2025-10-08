@@ -1,4 +1,9 @@
-document.addEventListener('DOMContentLoaded', async () => {
+// Simple popup script
+console.log('Popup script loaded');
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Popup DOM loaded');
+  
   const toggle = document.getElementById('toggle');
   const statusText = document.getElementById('statusText');
   const ruleCountEl = document.getElementById('ruleCount');
@@ -6,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resetDefaults = document.getElementById('resetDefaults');
 
   function renderEnabled(enabled) {
+    console.log('Rendering enabled state:', enabled);
     if (enabled) {
       toggle.classList.add('on');
       statusText.textContent = 'Enabled';
@@ -21,24 +27,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function sendMessage(type, payload) {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type, ...payload }, resolve);
+      console.log('Sending message:', type);
+      chrome.runtime.sendMessage({ type, ...payload }, function(response) {
+        console.log('Message response:', response);
+        resolve(response);
+      });
     });
   }
 
-  const status = await sendMessage('getStatus');
-  if (status) {
-    renderEnabled(status.enabled);
-    setRuleCount(status.ruleCount);
-  }
-
-  toggle.addEventListener('click', async () => {
-    const res = await sendMessage('toggleEnabled');
-    if (res && typeof res.enabled === 'boolean') {
-      renderEnabled(res.enabled);
+  // Load initial status
+  sendMessage('getStatus').then(function(status) {
+    console.log('Initial status:', status);
+    if (status) {
+      renderEnabled(status.enabled);
+      setRuleCount(status.ruleCount);
     }
   });
 
-  openOptions.addEventListener('click', () => {
+  // Toggle handler
+  toggle.addEventListener('click', function() {
+    console.log('Toggle clicked');
+    sendMessage('toggleEnabled').then(function(res) {
+      console.log('Toggle response:', res);
+      if (res && typeof res.enabled === 'boolean') {
+        renderEnabled(res.enabled);
+      }
+    });
+  });
+
+  // Options handler
+  openOptions.addEventListener('click', function() {
+    console.log('Opening options');
     if (chrome.runtime.openOptionsPage) {
       chrome.runtime.openOptionsPage();
     } else {
@@ -46,12 +65,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  resetDefaults.addEventListener('click', async () => {
-    await sendMessage('resetDefaults');
-    const status2 = await sendMessage('getStatus');
-    if (status2) {
-      renderEnabled(status2.enabled);
-      setRuleCount(status2.ruleCount);
-    }
+  // Reset handler
+  resetDefaults.addEventListener('click', function() {
+    console.log('Resetting defaults');
+    sendMessage('resetDefaults').then(function() {
+      sendMessage('getStatus').then(function(status) {
+        if (status) {
+          renderEnabled(status.enabled);
+          setRuleCount(status.ruleCount);
+        }
+      });
+    });
   });
-}); 
+});
+
+console.log('Popup script ready');

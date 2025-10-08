@@ -1,6 +1,13 @@
+// Simple options script
+console.log('Options script loaded');
+
 function sendMessage(type, payload) {
   return new Promise((resolve) => {
-    chrome.runtime.sendMessage({ type, ...payload }, resolve);
+    console.log('Sending message:', type);
+    chrome.runtime.sendMessage({ type, ...payload }, function(response) {
+      console.log('Message response:', response);
+      resolve(response);
+    });
   });
 }
 
@@ -31,7 +38,7 @@ function createRow(ext = '', folder = '') {
   const removeBtn = document.createElement('button');
   removeBtn.textContent = 'Remove';
   removeBtn.className = 'btn secondary';
-  removeBtn.addEventListener('click', () => {
+  removeBtn.addEventListener('click', function() {
     tr.remove();
     showToast('Rule removed');
   });
@@ -46,48 +53,61 @@ function createRow(ext = '', folder = '') {
   return tr;
 }
 
-async function loadRules() {
-  const res = await sendMessage('getRules');
-  const rules = (res && res.rules) ? res.rules : {};
-  const body = document.getElementById('rulesBody');
-  body.innerHTML = '';
-  Object.keys(rules).sort().forEach(ext => {
-    body.appendChild(createRow(ext, rules[ext]));
+function loadRules() {
+  console.log('Loading rules...');
+  sendMessage('getRules').then(function(res) {
+    console.log('Rules response:', res);
+    const rules = (res && res.rules) ? res.rules : {};
+    console.log('Parsed rules:', rules);
+    const body = document.getElementById('rulesBody');
+    body.innerHTML = '';
+    Object.keys(rules).sort().forEach(function(ext) {
+      body.appendChild(createRow(ext, rules[ext]));
+    });
+    console.log('Rules loaded, count:', Object.keys(rules).length);
   });
 }
 
-async function saveRules() {
+function saveRules() {
   const rows = Array.from(document.querySelectorAll('#rulesBody tr'));
   const rules = {};
-  for (const row of rows) {
-    const [extInput, folderInput] = row.querySelectorAll('input');
-    const ext = (extInput.value || '').trim().toLowerCase();
-    const folder = (folderInput.value || '').trim();
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const inputs = row.querySelectorAll('input');
+    const ext = (inputs[0].value || '').trim().toLowerCase();
+    const folder = (inputs[1].value || '').trim();
     if (!ext || !folder) continue;
     rules[ext] = folder;
   }
-  await sendMessage('saveRules', { rules });
-  const status = await sendMessage('getStatus');
-  if (status) {
+  
+  console.log('Saving rules:', rules);
+  sendMessage('saveRules', { rules: rules }).then(function() {
     showToast('Rules saved');
-  }
+  });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Options DOM loaded');
+  
   const addRowBtn = document.getElementById('addRow');
   const saveBtn = document.getElementById('save');
   const resetBtn = document.getElementById('reset');
 
-  addRowBtn.addEventListener('click', () => {
+  addRowBtn.addEventListener('click', function() {
     document.getElementById('rulesBody').appendChild(createRow());
     showToast('Rule added');
   });
+  
   saveBtn.addEventListener('click', saveRules);
-  resetBtn.addEventListener('click', async () => {
-    await sendMessage('resetDefaults');
-    await loadRules();
-    showToast('Defaults restored');
+  
+  resetBtn.addEventListener('click', function() {
+    sendMessage('resetDefaults').then(function() {
+      loadRules();
+      showToast('Defaults restored');
+    });
   });
 
-  await loadRules();
-}); 
+  loadRules();
+});
+
+console.log('Options script ready');
